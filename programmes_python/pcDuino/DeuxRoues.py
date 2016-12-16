@@ -1,7 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pyduino_pcduino import * # importe les fonctions Arduino pour Python
+##################################################################################
+# Programme de contrôle du robot T-Quad avec 2 roues classiques et une boule
+# omnidirectionnelle, disponible à l'adresse:
+# http://boutique.3sigma.fr/12-robots
+#
+# Auteur: 3Sigma
+# Version 1.1.1 - 16/12/2016
+##################################################################################
+
+# Importe les fonctions Arduino pour Python
+from pyduino_pcduino import *
 
 # Imports pour la communication i2c avec l'Arduino Mega
 from mega import Mega
@@ -399,7 +409,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if jsonMessage.get('vxref') != None:
             vxref = float(jsonMessage.get('vxref')) / 100.
         if jsonMessage.get('xiref') != None:
-            xiref = -float(jsonMessage.get('xiref')) * math.pi / 180.
+            xiref = float(jsonMessage.get('xiref')) * math.pi / 180.
         if jsonMessage.get('source_ximes') != None:
             # Choix de la source de la vitesse de rotation mesurée: 1: gyro, 0: vitesse des roues
             source_ximes = int(jsonMessage.get('source_ximes'))

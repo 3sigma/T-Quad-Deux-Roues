@@ -4,6 +4,7 @@
 	"plugins": [],
 	"panes": [
 		{
+			"title": "Télémétrie",
 			"width": 1,
 			"row": {
 				"2": 9,

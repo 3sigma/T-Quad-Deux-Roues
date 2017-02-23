@@ -7,7 +7,7 @@
 # http://boutique.3sigma.fr/12-robots
 #
 # Auteur: 3Sigma
-# Version 1.1.2 - 30/01/2017
+# Version 1.1.3 - 23/02/2017
 ##################################################################################
 
 # Importe les fonctions Arduino pour Python

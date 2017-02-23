@@ -66,11 +66,11 @@ umax = 6. # valeur max de la tension de commande du moteur
 umin = -6. # valeur min (ou max en négatif) de la tension de commande du moteur
 
 # Asservissements
-Kplongi = 3.3 # gain proportionnel du PID d'asservissement longitudinal
+Kplongi = 5.2 # gain proportionnel du PID d'asservissement longitudinal
 Kilongi = 82.0 # gain intégral du PID d'asservissement longitudinal
 Kdlongi = 0. # gain dérivé du PID d'asservissement longitudinal
 Tflongi = 0.02 # constante de temps de filtrage de l'action dérivée du PID d'asservissement longitudinal
-Kprot = 0.24 # gain proportionnel du PID d'asservissement de rotation
+Kprot = 1.0 # gain proportionnel du PID d'asservissement de rotation
 Kirot = 6.12 # gain intégral du PID d'asservissement rotation
 Kdrot = 0. # gain dérivé du PID d'asservissement rotation
 Tfrot = 0.02 # constante de temps de filtrage de l'action dérivée du PID d'asservissement rotation

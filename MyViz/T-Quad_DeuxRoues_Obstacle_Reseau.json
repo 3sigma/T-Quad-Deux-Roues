@@ -23,7 +23,7 @@
 				{
 					"type": "plot",
 					"settings": {
-						"title": "Vitesses longitudinales",
+						"title": "Vitesse longitudinale (m/s)",
 						"xaxis": "datasource_column",
 						"time": "datasources[\"ws\"][\"Temps\"]",
 						"time_window": 10,
@@ -32,46 +32,47 @@
 							"datasources[\"ws\"][\"vxmes\"]"
 						],
 						"y_axis_min_range": "-0.2,0.2",
+						"y2_axis_min_range": "-10,10",
 						"include_legend": true,
 						"legendStr": "vxref,vxmes",
-						"height": 3,
+						"height": 4,
 						"pausable": true
 					}
 				},
 				{
 					"type": "plot",
 					"settings": {
-						"title": "Vitesses de rotation",
+						"title": "Vitesse de rotation (deg/s)",
 						"xaxis": "datasource_column",
 						"time": "datasources[\"ws\"][\"Temps\"]",
 						"time_window": 10,
 						"value": [
 							"datasources[\"ws\"][\"consigne_xi\"]",
-							"datasources[\"ws\"][\"ximes\"]",
-							"datasources[\"ws\"][\"gz\"]"
+							"datasources[\"ws\"][\"ximes\"]"
 						],
 						"y_axis_min_range": "-0.1,0.1",
+						"y2_axis_min_range": "-10,10",
 						"include_legend": true,
-						"legendStr": "xiref,ximes,xigyro",
-						"height": 3,
+						"legendStr": "xiref,ximes",
+						"height": 4,
 						"pausable": true
 					}
 				},
 				{
 					"type": "plot",
 					"settings": {
-						"title": "Distance",
+						"title": "Distance (cm)",
 						"xaxis": "datasource_column",
 						"time": "datasources[\"ws\"][\"Temps\"]",
 						"time_window": 10,
 						"value": [
-							"datasources[\"ws\"][\"distance\"]",
-							"datasources[\"ws\"][\"distanceFiltre\"]"
+							"datasources[\"ws\"][\"distance\"]"
 						],
 						"y_axis_min_range": "-10,10",
+						"y2_axis_min_range": "-10,10",
 						"include_legend": true,
-						"legendStr": "distance, distance filtrée",
-						"height": 3,
+						"legendStr": "distance",
+						"height": 4,
 						"pausable": true
 					}
 				}
@@ -94,20 +95,22 @@
 					"type": "sshcommand",
 					"settings": {
 						"title": "Marche / Arrêt de l'application",
+						"style": "switch",
 						"host": "192.168.0.199",
 						"login": "root",
 						"password": "tquad",
-						"oncommand": "/root/programmes_python/startDeuxRoues.sh",
+						"oncommand": "/root/programmes_python/startDeuxRoues_Obstacle.sh",
 						"offcommand": "/root/programmes_python/stopPython.sh",
 						"ontext": "ON",
 						"offtext": "OFF",
-						"initialstate": false
+						"initialstate": false,
+						"caption": "Switch ON"
 					}
 				}
 			]
 		},
 		{
-			"title": "Pilotage",
+			"title": "Consignes",
 			"width": 1,
 			"row": {
 				"3": 5,
@@ -120,35 +123,31 @@
 			"col_width": 1,
 			"widgets": [
 				{
-					"type": "joypad2roues",
+					"type": "slider",
 					"settings": {
-						"title": "Vitesses longitudinale et de rotation",
-						"variablevxref": "datasources[\"ws\"][\"vxref\"]",
-						"variablexiref": "datasources[\"ws\"][\"xiref\"]"
+						"title": "Vitesse longitudinale (m/s)",
+						"variable": "datasources[\"ws\"][\"vxref\"]",
+						"formula": "x*100",
+						"initialvalue": 0,
+						"min": 0,
+						"max": 0.5,
+						"resolution": 2,
+						"resetvalue": 0,
+						"resetcaption": "Réinitialisation"
 					}
-				}
-			]
-		},
-		{
-			"title": "Mesure de la vitesse de rotation",
-			"width": 1,
-			"row": {
-				"3": 15,
-				"4": 15
-			},
-			"col": {
-				"3": 1,
-				"4": 1
-			},
-			"col_width": 1,
-			"widgets": [
+				},
 				{
-					"type": "switchbutton",
+					"type": "slider",
 					"settings": {
-						"variable": "datasources[\"ws\"][\"source_ximes\"]",
-						"yestext": "Gyro",
-						"notext": "Odo",
-						"initialstate": false
+						"title": "Distance d'évitement (cm)",
+						"variable": "datasources[\"ws\"][\"distanceEvitement\"]",
+						"formula": "x",
+						"initialvalue": 40,
+						"min": 10,
+						"max": 90,
+						"resolution": 0,
+						"resetvalue": 40,
+						"resetcaption": "Réinitialisation"
 					}
 				}
 			]
@@ -157,7 +156,7 @@
 			"title": "Moniteur",
 			"width": 1,
 			"row": {
-				"3": 19,
+				"3": 15,
 				"4": 23
 			},
 			"col": {
@@ -184,7 +183,7 @@
 			"type": "websocket",
 			"settings": {
 				"host": "ws://192.168.0.199:9090/ws",
-				"variables_to_send": "vxref,xiref,source_ximes",
+				"variables_to_send": "vxref,distanceEvitement",
 				"refresh_rate": "500",
 				"checksum": "none"
 			}

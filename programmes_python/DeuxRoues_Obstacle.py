@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 ##################################################################################
-# Programme de contrôle du robot T-Quad avec 2 roues classiques et une boule
-# omnidirectionnelle, disponible à l'adresse:
+# Programme d'évitement d'obstacles du robot T-Quad avec 2 roues classiques 
+# et une boule omnidirectionnelle, disponible à l'adresse:
 # http://boutique.3sigma.fr/12-robots
 #
 # Auteur: 3Sigma
@@ -125,6 +125,7 @@ distance = 0
 distancePrec = 0
 distanceFiltre = 0
 tauFiltreDistance = 0.03
+distanceEvitement = 40
 
 # Initialisation de l'IMU
 gz = 0.
@@ -168,7 +169,7 @@ def CalculVitesse():
         commandeArriereDroit, commandeArriereGauche, \
         codeurArriereDroitDeltaPosPrec, codeurArriereGaucheDeltaPosPrec, tprec, \
         idecimLectureTension, decimLectureTension, decimErreurLectureTension, tensionAlim, \
-        distance, idecimDistance, decimDistance, distancePrec, \
+        distance, idecimDistance, decimDistance, distancePrec, distanceEvitement, T0, \
         distanceFiltre, tauFiltreDistance, imu, gz, R, W, vxmes, ximes, vxref, xiref, source_ximes, hostname
     
     tdebut = time.time()
@@ -209,6 +210,37 @@ def CalculVitesse():
     dt2 = time.time() - tprec
     tprec = time.time()
     
+    # Calcul de la distance mesurée par le capteur ultrason
+    # On fait ce calcul après l'affichage pour savoir combien de temps
+    # il reste pour ne pas perturber la boucle
+    if idecimDistance >= decimDistance:            
+        idecimDistance = 0            
+                                
+        try:
+            distance = mega.read_distance()
+            if distance == 0:
+                # Correspond en fait à une distance supérieure à 200 cm
+                distance = 200
+            # print "Distance: ", distance, " cm"
+        except:
+            print "Probleme lecture distance"
+            pass
+            
+        # Filtre sur la distance
+        distanceFiltre = (dt2 * distance + tauFiltreDistance * distancePrec) / (dt + tauFiltreDistance)
+        distancePrec = distanceFiltre
+    else:
+        idecimDistance = idecimDistance + 1
+        
+    # Définition des consignes en fonction de la distance à l'obstacle
+    if (tdebut - T0 > 10) and  (distance > 0):    
+        if (distance < distanceEvitement):
+            vxref = 0.
+            xiref = 3.14
+        else:
+            xiref = 0
+
+
     # Si on n'a pas reçu de données depuis un certain temps, celles-ci sont annulées
     if (time.time()-timeLastReceived) > timeout and not timedOut:
         timedOut = True
@@ -242,29 +274,6 @@ def CalculVitesse():
     else:
         idecimLectureTension = idecimLectureTension + 1
     
-    
-    # Calcul de la distance mesurée par le capteur ultrason
-    # On fait ce calcul après l'affichage pour savoir combien de temps
-    # il reste pour ne pas perturber la boucle
-    if idecimDistance >= decimDistance:            
-        idecimDistance = 0            
-                                
-        try:
-            distance = mega.read_distance()
-            if distance == 0:
-                # Correspond en fait à une distance supérieure à 200 cm
-                distance = 200
-            # print "Distance: ", distance, " cm"
-        except:
-            print "Probleme lecture distance"
-            pass
-            
-        # Filtre sur la distance
-        distanceFiltre = (dt2 * distance + tauFiltreDistance * distancePrec) / (dt2 + tauFiltreDistance)
-        distancePrec = distanceFiltre
-    else:
-        idecimDistance = idecimDistance + 1
-
         
     #print time.time() - tdebut
 
@@ -388,7 +397,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     
 
     def on_message(self, message):
-        global vxref, xiref, source_ximes, timeLastReceived, timedOut
+        global vxref, distanceEvitement, timeLastReceived, timedOut
             
         jsonMessage = json.loads(message)
         
@@ -398,15 +407,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         
         if jsonMessage.get('vxref') != None:
             vxref = float(jsonMessage.get('vxref')) / 100.
-        if jsonMessage.get('xiref') != None:
-            xiref = float(jsonMessage.get('xiref')) * math.pi / 180.
-        if jsonMessage.get('source_ximes') != None:
-            # Choix de la source de la vitesse de rotation mesurée: 1: gyro, 0: vitesse des roues
-            source_ximes = int(jsonMessage.get('source_ximes'))
+        if jsonMessage.get('distanceEvitement') != None:
+            distanceEvitement = float(jsonMessage.get('distanceEvitement'))
             
         if not socketOK:
             vxref = 0.
-            xiref = 0.
 
         
     def on_close(self):
